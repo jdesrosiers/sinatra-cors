@@ -1,0 +1,164 @@
+ENV["RACK_ENV"] = "test"
+
+require "rspec"
+require "rack/test"
+require "fixture"
+
+RSpec.describe "Sinatra.Cors" do
+  include Rack::Test::Methods
+
+  def app
+    Sinatra::Application
+  end
+
+  describe "A non-CORS OPTIONS request" do
+    it "should not be handled" do
+      options "/foo"
+      expect(last_response).to be_not_found
+    end
+  end
+
+  describe "A CORS preflight with invalid method" do
+    before :all do
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+        "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "DELETE",
+      }
+      options "/foo", {}, rack_env
+    end
+
+    it "should not return an Access-Control-Allow-Origin header" do
+      expect(last_response["Access-Control-Allow-Origin"]).to be(nil)
+    end
+
+    it "should not return an Access-Control-Allow-Methods header" do
+      expect(last_response["Access-Control-Allow-Methods"]).to be(nil)
+    end
+  end
+
+  describe "A valid CORS preflight request" do
+    before :all do
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+        "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
+        "HTTP_ACCESS_CONTROL_REQUEST_HEADERS" => "if-modified-since"
+      }
+      options "/foo", {}, rack_env
+    end
+
+    it "should be handled for all routes" do
+      expect(last_response).to be_ok
+    end
+
+    it "should have an allow header that matches the :allow_methods setting" do
+      expect(last_response["Allow"]).to eq("GET HEAD POST")
+    end
+
+    it "should have an Access-Control-Allow-Methods header that includes only the method requested" do
+      expect(last_response["Access-Control-Allow-Methods"]).to eq("GET")
+    end
+
+    it "should have an Access-Control-Allow-Origin header that includes only the origin of the request" do
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
+    end
+
+    it "should have an Access-Control-Allow-Headers header that includes only the headers requested" do
+      expect(last_response["Access-Control-Allow-Headers"]).to eq("if-modified-since")
+    end
+  end
+
+  describe "The Access-Control-Max-Age header" do
+    after :all do
+      Sinatra::Application.disable :max_age
+    end
+
+    it "should be set to the value of the :max_age setting" do
+      Sinatra::Application.set :allow_origin, "http://example.com"
+      Sinatra::Application.set :max_age, "600"
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+        "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
+      }
+      options "/foo", {}, rack_env
+
+      expect(last_response["Access-Control-Max-Age"]).to eq("600")
+    end
+  end
+
+  describe "A CORS actual request" do
+    before :all do
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+      }
+      get "/foo", {}, rack_env
+    end
+
+    it "should have an Access-Control-Allow-Origin header that includes only the origin of the request" do
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
+    end
+  end
+
+  describe "The Access-Control-Allow-Origin header" do
+    before :all do
+      @allow_origin = Sinatra::Application.settings.allow_origin
+    end
+    after :all do
+      Sinatra::Application.set :allow_origin, @allow_origin
+    end
+
+    def make_request(allow_origin)
+      Sinatra::Application.set :allow_origin, allow_origin
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+      }
+      get "/foo", {}, rack_env
+    end
+
+    it "should be 'null' if the origin is not allowed" do
+      make_request("http://bar.com")
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("null")
+    end
+
+    it "should be 'null' if none of the origins are not allowed" do
+      make_request("http://foo.com http://bar.com")
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("null")
+    end
+
+    it "should allow any origin if :allowed_origin is '*'" do
+      make_request("*")
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
+    end
+  end
+
+  describe "The Access-Control-Allow-Credentials header" do
+    after :all do
+      Sinatra::Application.disable :allow_credentials
+    end
+
+    it "should be 'true' if :allow_credentials is true" do
+      Sinatra::Application.set :allow_credentials, true
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+      }
+      get "/foo", {}, rack_env
+
+      expect(last_response["Access-Control-Allow-Credentials"]).to eq("true")
+    end
+  end
+
+  describe "The Access-Control-Expose-Headers header" do
+    after :all do
+      Sinatra::Application.disable :expose_headers
+    end
+
+    it "should be set to the value of the :expose_headers setting" do
+      Sinatra::Application.set :expose_headers, "location link"
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+      }
+      get "/foo", {}, rack_env
+
+      expect(last_response["Access-Control-Expose-Headers"]).to eq("location link")
+    end
+  end
+end
