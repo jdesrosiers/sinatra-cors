@@ -13,7 +13,18 @@ RSpec.describe "Sinatra.Cors" do
 
   describe "A non-CORS OPTIONS request" do
     it "should not be handled" do
-      options "/foo"
+      options "/foo/1"
+      expect(last_response).to be_not_found
+    end
+  end
+
+  describe "A CORS preflight request for a route that doesn't exist" do
+    it "should 404" do
+      rack_env = {
+        "HTTP_ORIGIN" => "http://example.com",
+        "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
+      }
+      options "/baz/1", {}, rack_env
       expect(last_response).to be_not_found
     end
   end
@@ -24,7 +35,7 @@ RSpec.describe "Sinatra.Cors" do
         "HTTP_ORIGIN" => "http://example.com",
         "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "DELETE",
       }
-      options "/foo", {}, rack_env
+      options "/foo/1", {}, rack_env
     end
 
     it "should not return an Access-Control-Allow-Origin header" do
@@ -43,15 +54,15 @@ RSpec.describe "Sinatra.Cors" do
         "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
         "HTTP_ACCESS_CONTROL_REQUEST_HEADERS" => "if-modified-since"
       }
-      options "/foo", {}, rack_env
+      options "/foo/1", {}, rack_env
     end
 
     it "should be handled for all routes" do
       expect(last_response).to be_ok
     end
 
-    it "should have an allow header that matches the :allow_methods setting" do
-      expect(last_response["Allow"]).to eq("GET HEAD POST")
+    it "should have an Allow header build from existing routes" do
+      expect(last_response["Allow"]).to eq("GET HEAD DELETE OPTIONS")
     end
 
     it "should have an Access-Control-Allow-Methods header that includes only the method requested" do
@@ -79,7 +90,7 @@ RSpec.describe "Sinatra.Cors" do
         "HTTP_ORIGIN" => "http://example.com",
         "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
       }
-      options "/foo", {}, rack_env
+      options "/foo/1", {}, rack_env
 
       expect(last_response["Access-Control-Max-Age"]).to eq("600")
     end
@@ -90,7 +101,7 @@ RSpec.describe "Sinatra.Cors" do
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
-      get "/foo", {}, rack_env
+      get "/foo/1", {}, rack_env
     end
 
     it "should have an Access-Control-Allow-Origin header that includes only the origin of the request" do
@@ -111,7 +122,7 @@ RSpec.describe "Sinatra.Cors" do
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
-      get "/foo", {}, rack_env
+      get "/foo/1", {}, rack_env
     end
 
     it "should be 'null' if the origin is not allowed" do
@@ -140,7 +151,7 @@ RSpec.describe "Sinatra.Cors" do
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
-      get "/foo", {}, rack_env
+      get "/foo/1", {}, rack_env
 
       expect(last_response["Access-Control-Allow-Credentials"]).to eq("true")
     end
@@ -156,7 +167,7 @@ RSpec.describe "Sinatra.Cors" do
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
-      get "/foo", {}, rack_env
+      get "/foo/1", {}, rack_env
 
       expect(last_response["Access-Control-Expose-Headers"]).to eq("location link")
     end

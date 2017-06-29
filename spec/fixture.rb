@@ -1,8 +1,16 @@
 require "sinatra"
 require "./lib/sinatra/cors"
 
-get "/foo" do
+get "/foo/:id" do
   "foo"
+end
+
+delete "/foo/:id" do
+  "foo"
+end
+
+post "/bar/:id" do
+  "bar"
 end
 
 register Sinatra::Cors

@@ -10,6 +10,7 @@ module Sinatra
               logger.warn bad_method_message
               return
             end
+
             unless headers_are_allowed?
               logger.warn bad_headers_message
               return
@@ -41,16 +42,15 @@ module Sinatra
       end
 
       def method_is_allowed?
-        allow_methods = settings.allow_methods || response.headers["Allow"] || ""
-        request_method = request.env["HTTP_ACCESS_CONTROL_REQUEST_METHOD"] || ""
-        allow_methods.split.include? request_method
+        allow_methods = settings.allow_methods.split & response.headers["Allow"].split
+        request_method = request.env["HTTP_ACCESS_CONTROL_REQUEST_METHOD"]
+        allow_methods.include? request_method
       end
 
       def headers_are_allowed?
-        allow_headers = settings.allow_headers || ""
+        allow_headers = settings.allow_headers
         request_headers = request.env["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"] || ""
-        diff = request_headers.split - allow_headers.split
-        diff.size == 0
+        (request_headers.split - allow_headers.split).empty?
       end
 
       def origin_is_allowed?
@@ -81,19 +81,30 @@ to requests with these headers, you can add them to the `allow_headers` sinatra 
     def self.registered(app)
       app.helpers Cors::Helpers
 
-      app.disable :allow_origin
-      app.disable :allow_methods
-      app.disable :allow_headers
+      app.set :allow_origin, ""
+      app.set :allow_methods, ""
+      app.set :allow_headers, ""
       app.disable :max_age
       app.disable :expose_headers
       app.disable :allow_credentials
 
-      app.set(:is_cors_preflight) { |bool|
+      app.set(:is_cors_preflight) do |bool|
         condition { is_cors_request? && is_preflight_request? == bool }
-      }
+      end
 
       app.options "*", is_cors_preflight: true do
-        response.headers["Allow"] = settings.allow_methods || ""
+        matches = []
+        settings.routes.each do |method, routes|
+          routes.each do |route|
+            process_route(route[0], route[1], route[2]) do |application, pattern|
+              matches << method
+            end
+          end
+        end
+
+        pass if matches.size == 1
+
+        response.headers["Allow"] = matches.join " "
       end
 
       app.after do

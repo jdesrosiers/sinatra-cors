@@ -42,5 +42,4 @@ Settings
 
 Comming Soon
 ------------
-* Automatically determine `Allow` headers based on existing routes
 * Route specific settings
