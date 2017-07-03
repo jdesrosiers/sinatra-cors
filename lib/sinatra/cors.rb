@@ -57,6 +57,19 @@ module Sinatra
         settings.allow_origin == "*" || settings.allow_origin.split.include?(request.env["HTTP_ORIGIN"])
       end
 
+      def allowed_methods
+        matches = []
+        settings.routes.each do |method, routes|
+          routes.each do |route|
+            process_route(route[0], route[1], route[2]) do |application, pattern|
+              matches << method
+            end
+          end
+        end
+
+        matches
+      end
+
       private
 
       def bad_method_message
@@ -93,18 +106,11 @@ to requests with these headers, you can add them to the `allow_headers` sinatra 
       end
 
       app.options "*", is_cors_preflight: true do
-        matches = []
-        settings.routes.each do |method, routes|
-          routes.each do |route|
-            process_route(route[0], route[1], route[2]) do |application, pattern|
-              matches << method
-            end
-          end
-        end
+        allow = allowed_methods
 
-        pass if matches.size == 1
+        pass if allow.size == 1
 
-        response.headers["Allow"] = matches.join " "
+        response.headers["Allow"] = allow.join " "
       end
 
       app.after do
