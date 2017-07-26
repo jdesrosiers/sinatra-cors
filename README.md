@@ -12,23 +12,36 @@ Quick Start
 -----------
 The following is an example of how to create a CORS enabled route with some typical default configuration.
 
-**IMPORTANT:** The plugin handles OPTIONS requests automatically, but if you have reason to add OPTIONS routes for some or all of your routes manually, you will need to put the `register Sinatra::Cors` line after the OPTIONS routes that you create.
+```ruby
+require "sinatra"
+require "sinatra/cors"
 
-**IMPORTANT:** The CORS settings must come after the `register Sinatra::Cors` line.
+set :allow_origin, "http://example.com http://foo.com"
+set :allow_methods, "GET HEAD POST"
+set :allow_headers, "content-type"
+
+get "/foo" do
+  "foo"
+end
+```
+
+Or, for a modular style application.
 
 ```ruby
 require "sinatra"
 require "sinatra/cors"
 
-get "/foo" do
-  "foo"
+class Foo < Sinatra::Base
+  register Sinatra::Cors
+
+  set :allow_origin, "http://example.com http://foo.com"
+  set :allow_methods, "GET HEAD POST"
+  set :allow_headers, "content-type"
+
+  get "/foo" do
+    "foo"
+  end
 end
-
-register Sinatra::Cors
-
-set :allow_origin, "http://example.com http://foo.com"
-set :allow_methods, "GET HEAD POST"
-set :allow_headers, "content-type"
 ```
 
 Settings

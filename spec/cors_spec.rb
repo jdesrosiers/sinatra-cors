@@ -62,7 +62,7 @@ RSpec.describe "Sinatra.Cors" do
     end
 
     it "should have an Allow header build from existing routes" do
-      expect(last_response["Allow"]).to eq("GET HEAD DELETE OPTIONS")
+      expect(last_response["Allow"]).to eq("OPTIONS GET HEAD DELETE")
     end
 
     it "should have an Access-Control-Allow-Methods header that includes only the method requested" do

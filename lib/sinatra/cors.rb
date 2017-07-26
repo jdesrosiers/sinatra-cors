@@ -61,7 +61,7 @@ module Sinatra
         matches = []
         settings.routes.each do |method, routes|
           routes.each do |route|
-            process_route(route[0], route[1], route[2]) do |application, pattern|
+            process_route(route[0], route[1]) do |application, pattern|
               matches << method
             end
           end
@@ -118,4 +118,6 @@ to requests with these headers, you can add them to the `allow_headers` sinatra 
       end
     end
   end
+
+  register Cors
 end
