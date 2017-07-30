@@ -62,7 +62,7 @@ RSpec.describe "Sinatra.Cors" do
     end
 
     it "should have an Allow header build from existing routes" do
-      expect(last_response["Allow"]).to eq("OPTIONS GET HEAD DELETE")
+      expect(last_response["Allow"]).to eq("OPTIONS,GET,HEAD,DELETE")
     end
 
     it "should have an Access-Control-Allow-Methods header that includes only the method requested" do
@@ -163,13 +163,13 @@ RSpec.describe "Sinatra.Cors" do
     end
 
     it "should be set to the value of the :expose_headers setting" do
-      Sinatra::Application.set :expose_headers, "location link"
+      Sinatra::Application.set :expose_headers, "location,link"
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
       get "/foo/1", {}, rack_env
 
-      expect(last_response["Access-Control-Expose-Headers"]).to eq("location link")
+      expect(last_response["Access-Control-Expose-Headers"]).to eq("location,link")
     end
   end
 end

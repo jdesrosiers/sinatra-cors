@@ -2,8 +2,9 @@ require "sinatra"
 require "./lib/sinatra/cors"
 
 set :allow_origin, "http://example.com http://foo.com"
-set :allow_methods, "GET HEAD POST"
-set :allow_headers, "content-type if-modified-since"
+set :allow_methods, "GET,HEAD,POST"
+set :allow_headers, "content-type,if-modified-since"
+set :expose_headers, "location,link"
 
 get "/foo/:id" do
   "foo"

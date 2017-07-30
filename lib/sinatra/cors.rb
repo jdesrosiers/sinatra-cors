@@ -42,19 +42,20 @@ module Sinatra
       end
 
       def method_is_allowed?
-        allow_methods = settings.allow_methods.split & response.headers["Allow"].split
-        request_method = request.env["HTTP_ACCESS_CONTROL_REQUEST_METHOD"]
-        allow_methods.include? request_method
+        allow_methods =
+          settings.allow_methods.upcase.split(/\s*,\s*/) &
+          response.headers["Allow"].upcase.split(/\s*,\s*/)
+        allow_methods.include? request.env["HTTP_ACCESS_CONTROL_REQUEST_METHOD"].upcase
       end
 
       def headers_are_allowed?
         allow_headers = settings.allow_headers
         request_headers = request.env["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"] || ""
-        (request_headers.split - allow_headers.split).empty?
+        (request_headers.downcase.split(/\s*,\s*/) - allow_headers.downcase.split(/\s*,\s*/)).empty?
       end
 
       def origin_is_allowed?
-        settings.allow_origin == "*" || settings.allow_origin.split.include?(request.env["HTTP_ORIGIN"])
+        settings.allow_origin == "*" || settings.allow_origin.downcase.split.include?(request.env["HTTP_ORIGIN"])
       end
 
       def allowed_methods
@@ -110,7 +111,7 @@ to requests with these headers, you can add them to the `allow_headers` sinatra 
 
         pass if allow.size == 1
 
-        response.headers["Allow"] = allow.join " "
+        response.headers["Allow"] = allow.join ","
       end
 
       app.after do

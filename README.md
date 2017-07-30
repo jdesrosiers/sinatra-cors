@@ -17,8 +17,9 @@ require "sinatra"
 require "sinatra/cors"
 
 set :allow_origin, "http://example.com http://foo.com"
-set :allow_methods, "GET HEAD POST"
-set :allow_headers, "content-type"
+set :allow_methods, "GET,HEAD,POST"
+set :allow_headers, "content-type,if-modified-since"
+set :expose_headers, "location,link"
 
 get "/foo" do
   "foo"
@@ -35,8 +36,9 @@ class Foo < Sinatra::Base
   register Sinatra::Cors
 
   set :allow_origin, "http://example.com http://foo.com"
-  set :allow_methods, "GET HEAD POST"
-  set :allow_headers, "content-type"
+  set :allow_methods, "GET,HEAD,POST"
+  set :allow_headers, "content-type,if-modified-since"
+  set :expose_headers, "location,link"
 
   get "/foo" do
     "foo"
@@ -47,12 +49,8 @@ end
 Settings
 --------
 * **allow_origin**: A space-separated list of allowed origins. (Example: "https://example.com")
-* **allow_methods**: A space-separated list of allowed methods. (Example: "GET HEAD POST")
-* **allow_headers**: A space-spearated list of allowed request headers. (Example: "content-type")
+* **allow_methods**: A comma-separated list of allowed methods. (Example: "GET,HEAD,POST")
+* **allow_headers**: A comma-spearated list of allowed request headers. (Example: "content-type,if-modified-since")
 * **max_age**: The number of seconds you allow the client to cache a preflight response (Example: "500")
-* **expose_headers**: A space-separated list of response headers the client will have access to. (Example: "location link")
+* **expose_headers**: A comma-separated list of response headers the client will have access to. (Example: "location,link")
 * **allow_credentials**: If true, it will allow actual requests to send things like cookies, HTTP authentication, and client-side SSL certificates. (Example: true)
-
-Comming Soon
-------------
-* Route specific settings
