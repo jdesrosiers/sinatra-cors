@@ -80,12 +80,12 @@ RSpec.describe "Sinatra.Cors" do
 
   describe "The Access-Control-Max-Age header" do
     after :all do
-      Sinatra::Application.disable :max_age
+      app.disable :max_age
     end
 
     it "should be set to the value of the :max_age setting" do
-      Sinatra::Application.set :allow_origin, "http://example.com"
-      Sinatra::Application.set :max_age, "600"
+      app.set :allow_origin, "http://example.com"
+      app.set :max_age, "600"
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
         "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
@@ -111,14 +111,14 @@ RSpec.describe "Sinatra.Cors" do
 
   describe "The Access-Control-Allow-Origin header" do
     before :all do
-      @allow_origin = Sinatra::Application.settings.allow_origin
+      @allow_origin = app.settings.allow_origin
     end
     after :all do
-      Sinatra::Application.set :allow_origin, @allow_origin
+      app.set :allow_origin, @allow_origin
     end
 
     def make_request(allow_origin)
-      Sinatra::Application.set :allow_origin, allow_origin
+      app.set :allow_origin, allow_origin
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
@@ -143,11 +143,11 @@ RSpec.describe "Sinatra.Cors" do
 
   describe "The Access-Control-Allow-Credentials header" do
     after :all do
-      Sinatra::Application.disable :allow_credentials
+      app.disable :allow_credentials
     end
 
     it "should be 'true' if :allow_credentials is true" do
-      Sinatra::Application.set :allow_credentials, true
+      app.set :allow_credentials, true
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }
@@ -159,11 +159,11 @@ RSpec.describe "Sinatra.Cors" do
 
   describe "The Access-Control-Expose-Headers header" do
     after :all do
-      Sinatra::Application.disable :expose_headers
+      app.disable :expose_headers
     end
 
     it "should be set to the value of the :expose_headers setting" do
-      Sinatra::Application.set :expose_headers, "location,link"
+      app.set :expose_headers, "location,link"
       rack_env = {
         "HTTP_ORIGIN" => "http://example.com",
       }

@@ -68,7 +68,7 @@ module Sinatra
           end
         end
 
-        matches
+        matches.uniq
       end
 
       private
@@ -88,7 +88,10 @@ to requests with these headers, you can add them to the `allow_headers` sinatra 
       end
 
       def bad_origin_message
-        "This CORS request was rejected because the client is making the request from '#{request.env["HTTP_ORIGIN"]}', but the server only allows requests from '#{settings.allow_origin}'.  To allow the server to respond to requests from this origin, you can add it to the `allow_origin` sinatra setting."
+        "This CORS request was rejected because the client is making the request from \
+'#{request.env["HTTP_ORIGIN"]}', but the server only allows requests from '#{settings.allow_origin}'.  \
+To allow the server to respond to requests from this origin, you can add it to the `allow_origin` \
+sinatra setting."
       end
     end
 
