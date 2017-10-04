@@ -48,33 +48,49 @@ RSpec.describe "Sinatra.Cors" do
   end
 
   describe "A valid CORS preflight request" do
-    before :all do
-      rack_env = {
-        "HTTP_ORIGIN" => "http://example.com",
-        "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
-        "HTTP_ACCESS_CONTROL_REQUEST_HEADERS" => "if-modified-since"
-      }
-      options "/foo/1", {}, rack_env
+    describe "with an Access-Control-Request-Headers header" do
+      before :all do
+        rack_env = {
+          "HTTP_ORIGIN" => "http://example.com",
+          "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET",
+          "HTTP_ACCESS_CONTROL_REQUEST_HEADERS" => "if-modified-since"
+        }
+        options "/foo/1", {}, rack_env
+      end
+
+      it "should be handled for all routes" do
+        expect(last_response).to be_ok
+      end
+
+      it "should have an Allow header build from existing routes" do
+        expect(last_response["Allow"]).to eq("OPTIONS,GET,HEAD,DELETE")
+      end
+
+      it "should have an Access-Control-Allow-Methods header that includes only the method requested" do
+        expect(last_response["Access-Control-Allow-Methods"]).to eq("GET")
+      end
+
+      it "should have an Access-Control-Allow-Origin header that includes only the origin of the request" do
+        expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
+      end
+
+      it "should have an Access-Control-Allow-Headers header that includes only the headers requested" do
+        expect(last_response["Access-Control-Allow-Headers"]).to eq("if-modified-since")
+      end
     end
 
-    it "should be handled for all routes" do
-      expect(last_response).to be_ok
-    end
+    describe "without an Access-Control-Request-Headers header" do
+      before :all do
+        rack_env = {
+          "HTTP_ORIGIN" => "http://example.com",
+          "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "GET"
+        }
+        options "/foo/1", {}, rack_env
+      end
 
-    it "should have an Allow header build from existing routes" do
-      expect(last_response["Allow"]).to eq("OPTIONS,GET,HEAD,DELETE")
-    end
-
-    it "should have an Access-Control-Allow-Methods header that includes only the method requested" do
-      expect(last_response["Access-Control-Allow-Methods"]).to eq("GET")
-    end
-
-    it "should have an Access-Control-Allow-Origin header that includes only the origin of the request" do
-      expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
-    end
-
-    it "should have an Access-Control-Allow-Headers header that includes only the headers requested" do
-      expect(last_response["Access-Control-Allow-Headers"]).to eq("if-modified-since")
+      it "should not have an Access-Control-Allow-Headers header" do
+        expect(last_response.has_header? "Access-Control-Allow-Headers").to eq(false)
+      end
     end
   end
 

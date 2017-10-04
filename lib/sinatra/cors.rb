@@ -16,8 +16,8 @@ module Sinatra
               return
             end
 
-            response.headers["Access-Control-Allow-Headers"] = request.env["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"]
-            response.headers["Access-Control-Allow-Methods"] = request.env["HTTP_ACCESS_CONTROL_REQUEST_METHOD"]
+            response.headers["Access-Control-Allow-Headers"] = request_headers if request_headers
+            response.headers["Access-Control-Allow-Methods"] = request_method
             response.headers["Access-Control-Max-Age"] = settings.max_age if settings.max_age?
           else
             response.headers["Access-Control-Expose-Headers"] = settings.expose_headers if settings.expose_headers?
@@ -69,6 +69,14 @@ module Sinatra
         end
 
         matches.uniq
+      end
+
+      def request_headers
+        request.env["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"]
+      end
+
+      def request_method
+        request.env["HTTP_ACCESS_CONTROL_REQUEST_METHOD"]
       end
 
       private
