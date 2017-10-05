@@ -39,11 +39,7 @@ RSpec.describe "Sinatra.Cors" do
     end
 
     it "should not return an Access-Control-Allow-Origin header" do
-      expect(last_response["Access-Control-Allow-Origin"]).to be(nil)
-    end
-
-    it "should not return an Access-Control-Allow-Methods header" do
-      expect(last_response["Access-Control-Allow-Methods"]).to be(nil)
+      assert_no_access_control_headers
     end
   end
 
@@ -143,12 +139,12 @@ RSpec.describe "Sinatra.Cors" do
 
     it "should have no access control headers if the origin is not allowed" do
       make_request("http://bar.com")
-      expect(last_response["Access-Control-Allow-Origin"]).to eq(nil)
+      assert_no_access_control_headers
     end
 
     it "should have no access control headers if none of the origins are not allowed" do
       make_request("http://foo.com http://bar.com")
-      expect(last_response["Access-Control-Allow-Origin"]).to eq(nil)
+      assert_no_access_control_headers
     end
 
     it "should allow any origin if :allowed_origin is '*'" do
@@ -187,5 +183,14 @@ RSpec.describe "Sinatra.Cors" do
 
       expect(last_response["Access-Control-Expose-Headers"]).to eq("location,link")
     end
+  end
+
+  def assert_no_access_control_headers
+      expect(last_response["Access-Control-Allow-Origin"]).to eq(nil)
+      expect(last_response["Access-Control-Allow-Header"]).to eq(nil)
+      expect(last_response["Access-Control-Allow-Methods"]).to eq(nil)
+      expect(last_response["Access-Control-Max-Age"]).to eq(nil)
+      expect(last_response["Access-Control-Expose-Headers"]).to eq(nil)
+      expect(last_response["Access-Control-Allow-Credentials"]).to eq(nil)
   end
 end
