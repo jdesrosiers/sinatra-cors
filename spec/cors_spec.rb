@@ -141,14 +141,14 @@ RSpec.describe "Sinatra.Cors" do
       get "/foo/1", {}, rack_env
     end
 
-    it "should be 'null' if the origin is not allowed" do
+    it "should have no access control headers if the origin is not allowed" do
       make_request("http://bar.com")
-      expect(last_response["Access-Control-Allow-Origin"]).to eq("null")
+      expect(last_response["Access-Control-Allow-Origin"]).to eq(nil)
     end
 
-    it "should be 'null' if none of the origins are not allowed" do
+    it "should have no access control headers if none of the origins are not allowed" do
       make_request("http://foo.com http://bar.com")
-      expect(last_response["Access-Control-Allow-Origin"]).to eq("null")
+      expect(last_response["Access-Control-Allow-Origin"]).to eq(nil)
     end
 
     it "should allow any origin if :allowed_origin is '*'" do
