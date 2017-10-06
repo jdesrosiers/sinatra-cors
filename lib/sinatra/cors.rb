@@ -5,6 +5,11 @@ module Sinatra
     module Helpers
       def cors
         if is_cors_request?
+          unless origin_is_allowed?
+            logger.warn bad_origin_message
+            return
+          end
+
           if is_preflight_request?
             unless method_is_allowed?
               logger.warn bad_method_message
@@ -23,12 +28,7 @@ module Sinatra
             response.headers["Access-Control-Expose-Headers"] = settings.expose_headers if settings.expose_headers?
           end
 
-          if origin_is_allowed?
-            response.headers["Access-Control-Allow-Origin"] = request.env["HTTP_ORIGIN"]
-          else
-            logger.warn bad_origin_message
-            response.headers["Access-Control-Allow-Origin"] = "null"
-          end
+          response.headers["Access-Control-Allow-Origin"] = request.env["HTTP_ORIGIN"]
           response.headers["Access-Control-Allow-Credentials"] = settings.allow_credentials.to_s if settings.allow_credentials?
         end
       end
