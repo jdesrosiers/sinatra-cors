@@ -151,6 +151,16 @@ RSpec.describe "Sinatra.Cors" do
       make_request("*")
       expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
     end
+
+    it "should allow regexps on the :allowed_origin option" do
+      make_request(/.*example.com/)
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
+    end
+
+    it "should allow multiple types on the :allowed_origin option" do
+      make_request([/not-a-match/, "notamatch.com", /.*/])
+      expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
+    end
   end
 
   describe "The Access-Control-Allow-Credentials header" do
