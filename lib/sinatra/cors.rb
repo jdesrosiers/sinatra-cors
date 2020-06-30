@@ -55,7 +55,21 @@ module Sinatra
       end
 
       def origin_is_allowed?
-        settings.allow_origin == "*" || settings.allow_origin.downcase.split.include?(request.env["HTTP_ORIGIN"])
+        request_origin = request.env["HTTP_ORIGIN"]
+
+        if settings.allow_origin.is_a?(Array)
+          settings.allow_origin.any? { |origin| allowed_origin?(origin, request_origin) }
+        else
+          allowed_origin?(settings.allow_origin, request_origin)
+        end
+      end
+
+      def allowed_origin?(allowed_origin, origin)
+        if allowed_origin.is_a?(Regexp)
+          allowed_origin.match?(origin)
+        else
+          allowed_origin == "*" || allowed_origin.downcase.split.include?(origin)
+        end
       end
 
       def allowed_methods
