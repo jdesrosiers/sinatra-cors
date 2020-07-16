@@ -147,17 +147,17 @@ RSpec.describe "Sinatra.Cors" do
       assert_no_access_control_headers
     end
 
-    it "should allow any origin if :allowed_origin is '*'" do
+    it "should allow any origin if :allow_origin is '*'" do
       make_request("*")
       expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
     end
 
-    it "should allow regexps on the :allowed_origin option" do
+    it "should allow regexps on the :allow_origin option" do
       make_request(/.*example.com/)
       expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
     end
 
-    it "should allow multiple types on the :allowed_origin option" do
+    it "should allow multiple types on the :allow_origin option" do
       make_request([/not-a-match/, "notamatch.com", /.*/])
       expect(last_response["Access-Control-Allow-Origin"]).to eq("http://example.com")
     end
