@@ -48,7 +48,7 @@ end
 
 Settings
 --------
-* **allow_origin**: A space-separated list of allowed origins. (Example: "https://example.com")
+* **allow_origin**: A regex, or space-separated list of allowed origins, or an array of either of the previous two. (Example: "https://example.com")
 * **allow_methods**: A comma-separated list of allowed methods. (Example: "GET,HEAD,POST")
 * **allow_headers**: A comma-spearated list of allowed request headers. (Example: "content-type,if-modified-since")
 * **max_age**: The number of seconds you allow the client to cache a preflight response (Example: "500")
