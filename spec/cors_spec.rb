@@ -142,7 +142,7 @@ RSpec.describe "Sinatra.Cors" do
       assert_no_access_control_headers
     end
 
-    it "should have no access control headers if none of the origins are not allowed" do
+    it "should have no access control headers if none of the origins are allowed" do
       make_request("http://foo.com http://bar.com")
       assert_no_access_control_headers
     end
